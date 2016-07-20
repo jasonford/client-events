@@ -16,7 +16,7 @@ window.addEventListener("load", function () {
   }
   
   function customEvent(type, info) {
-    var e = new CustomEvent(type, {});
+    var e = new CustomEvent(type, {bubbles:true,cancelable:true});
     for (var field in info) {
       e[field] = info[field];
     }
