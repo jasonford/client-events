@@ -1,15 +1,14 @@
 window.addEventListener("load", function () {
   function once(node, types, callback) {
-    function reaction(e) {
-      // remove event
-      var listener = arguments.callee;
-      types.split(" ").forEach(function (type) {
-        node.removeEventListener(type, listener);
-      });
-      // call handler
-      return callback(e);
-    }
     types.split(" ").forEach(function (type) {
+      function reaction(e) {
+        // remove event
+        types.split(" ").forEach(function (type) {
+          node.removeEventListener(type, reaction);
+        });
+        // call handler
+        return callback(e);
+      }
       node.addEventListener(type, reaction);
     });
 
@@ -17,9 +16,9 @@ window.addEventListener("load", function () {
   
   function customEvent(type, info) {
     var e = new CustomEvent(type, {bubbles:true,cancelable:true});
-    for (var field in info) {
+    Object.keys(info).forEach((field)=>{
       e[field] = info[field];
-    }
+    });
     return e;
   }
   
@@ -31,8 +30,6 @@ window.addEventListener("load", function () {
   var doubletapDistanceThreshold = 8;
 
   var holdTimeThreshold = 500;
-
-  var lastTouchTime = 0;
 
   function distance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(x1-x2, 2) + Math.pow(y1-y2, 2));
@@ -98,13 +95,11 @@ window.addEventListener("load", function () {
   });
 
   var dragging = false;
-  var hovered = null;
 
   window.addEventListener('mousewheel', function (event) {});
 
   window.addEventListener('mouseenter', function (event) {
     if (!dragging) {
-      hovered = event.target;
       var hoverEvent = customEvent('hover', {
         x : event.pageX,
         y : event.pageY
@@ -171,7 +166,7 @@ window.addEventListener("load", function () {
     });
   });
 
-  //  TODO: enable/disable wheel == pinch... behaviour at consumer level
+  //  TODO: enable/disable wheel === pinch... behaviour at consumer level
   window.addEventListener('wheel', function (event) {
     var scale;
     if (event.deltaY > 0) {
@@ -180,7 +175,7 @@ window.addEventListener("load", function () {
     else {
       scale = 1/1.05;
     }
-    pinchEvent = customEvent('pinch', {
+    var pinchEvent = customEvent('pinch', {
       scale : scale,
       x : event.pageX,
       y : event.pageY
@@ -197,10 +192,10 @@ window.addEventListener("load", function () {
     var lastD = 0;
     var firstD = 0;
 
-    if (startEvent.touches.length == 1) {
+    if (startEvent.touches.length === 1) {
       // okay
     }
-    else if (startEvent.touches.length == 2) {
+    else if (startEvent.touches.length === 2) {
       var x1 = startX;
       var y1 = startY;
       var x2 = startEvent.touches[1].pageX;
@@ -223,11 +218,10 @@ window.addEventListener("load", function () {
     function drag(moveEvent) {
       var x = moveEvent.touches[0].pageX;
       var y = moveEvent.touches[0].pageY;
-      var scale = 1;
       var t = new Date();
       var pinchEvent;
 
-      if (startEvent.touches.length == 2) {
+      if (startEvent.touches.length === 2) {
         var x1 = x;
         var y1 = y;
         var x2 = moveEvent.touches[1].pageX;
@@ -249,7 +243,7 @@ window.addEventListener("load", function () {
 
       var dx = x - lastX;
       var dy = y - lastY;
-      var dragEvent = customEvent('drag', {
+      var dragEvent = customEvent('onedrag', {
         dx : dx,
         dy : dy,
         tx : x - startX,
@@ -313,24 +307,20 @@ window.addEventListener("load", function () {
     //  last 5 velocities recorded in x direction
     var vx = [0,0,0,0,0];
     var lastT = new Date();
-    var lastD = 0;
-    var firstD = 0;
 
     var lastX = startX;
     var lastY = startY;
 
     function drag(moveEvent) {
       dragging = true;
-//      moveEvent.preventDefault();
 
       var x = moveEvent.pageX;
       var y = moveEvent.pageY;
-      var scale = 1;
       var t = new Date();
 
       var dx = x - lastX;
       var dy = y - lastY;
-      var dragEvent = customEvent('drag', {
+      var dragEvent = customEvent('onedrag', {
         dx : dx,
         dy : dy,
         tx : x - startX,
